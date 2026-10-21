@@ -86,7 +86,7 @@ Exact values are in `models/metrics.json`.
 1. After everything works locally: `pip freeze`, then copy exact versions of pandas, numpy, scipy, fastapi, uvicorn into `requirements-deploy.txt` (use `pkg==version`).
 2. Commit `models/` (the files must be small enough for normal GitHub; if not, host them elsewhere and download once at startup).
 3. Render: New > Web Service > connect the repository. Build: `pip install -r requirements-deploy.txt`. Start: `uvicorn backend.main:app --host 0.0.0.0 --port $PORT`. Health check: `/api/health`. A `render.yaml` is included. Check Render's current docs for Python version and free-tier limits.
-4. Open the live URL and test every feature before writing it here: **URL: (add after verified)**
+4. Open the live URL and test every feature before writing it here: **URL: https://cartwise-ai.onrender.com **
 
 ## Tests
 `pytest -q` runs metric, preprocessing, split, model, pipeline and API tests on small synthetic data (never the real dataset).
