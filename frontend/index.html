@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CartWise AI | Fashion discovery that learns your taste</title>
+  <meta name="description" content="CartWise AI recommends fashion products using product text and customer rating patterns.">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="site-header">
+    <a class="brand" href="/" aria-label="CartWise AI home"><span class="brand-mark" aria-hidden="true">CW</span>CartWise <em>AI</em></a>
+    <form id="search-form" class="search" role="search">
+      <label class="sr-only" for="q">Search products</label>
+      <input id="q" type="search" placeholder="Search by product name or brand" autocomplete="off" maxlength="100">
+      <button type="submit">Search</button>
+    </form>
+    <nav class="tabs" aria-label="Sections">
+      <button class="tab" data-view="discover" aria-current="page">Discover</button>
+      <button class="tab" data-view="foryou">For you</button>
+      <button class="tab" data-view="results">Model results</button>
+    </nav>
+  </header>
+
+  <main id="main">
+    <section class="hero" id="hero">
+      <p class="eyebrow">Hybrid recommendation engine</p>
+      <h1>Find what fits, <span>before you search for it.</span></h1>
+      <p class="lede">CartWise AI reads product descriptions and learns from what similar customers liked. Every suggestion tells you why it appeared. Click any product to see similar items, or open &ldquo;For you&rdquo; for personalised picks.</p>
+    </section>
+
+    <section id="view-discover" class="view" aria-labelledby="discover-title">
+      <h2 id="discover-title" class="sr-only">Discover products</h2>
+      <div class="filters">
+        <label>Min price <input id="min-price" type="number" min="0" step="1" inputmode="decimal" placeholder="0"></label>
+        <label>Max price <input id="max-price" type="number" min="0" step="1" inputmode="decimal" placeholder="Any"></label>
+        <button id="apply-filters" type="button" class="ghost">Apply budget</button>
+        <p class="hint">The budget filter only includes products that have a listed price.</p>
+      </div>
+      <p id="discover-status" class="status" role="status" aria-live="polite"></p>
+      <button id="clear-search" type="button" class="ghost" hidden>Clear search and filters</button>
+      <div id="discover-grid" class="grid"></div>
+      <div class="pager"><button id="prev" class="ghost" type="button">Previous</button><span id="page-label"></span><button id="next" class="ghost" type="button">Next</button></div>
+    </section>
+
+    <section id="view-foryou" class="view" hidden aria-labelledby="foryou-title">
+      <h2 id="foryou-title">Recommended for you</h2>
+      <div class="filters">
+        <label>Customer <select id="customer"><option value="">Loading customers...</option></select></label>
+        <label>Collaborative weight: <output id="weight-out">0.5</output>
+          <input id="weight" type="range" min="0" max="1" step="0.1" value="0.5"></label>
+        <label>Max price <input id="fy-max-price" type="number" min="0" step="1" placeholder="Any"></label>
+        <button id="load-recs" type="button">Show recommendations</button>
+      </div>
+      <p class="hint">Customers are real reviewer profiles from the dataset. Slide towards 0 to rely on product text, towards 1 to rely on similar customers.</p>
+      <p id="liked" class="liked"></p>
+      <p id="foryou-status" class="status" role="status" aria-live="polite"></p>
+      <div id="foryou-grid" class="grid"></div>
+    </section>
+
+    <section id="view-results" class="view" hidden aria-labelledby="results-title">
+      <h2 id="results-title">Model results</h2>
+      <p class="hint">Measured on a time-based test set. These numbers come straight from the training run.</p>
+      <p id="results-status" class="status" role="status" aria-live="polite"></p>
+      <div id="results-body"></div>
+    </section>
+  </main>
+
+  <dialog id="detail" aria-labelledby="detail-title">
+    <button id="detail-close" class="close" type="button" aria-label="Close details">Close</button>
+    <div id="detail-body"></div>
+  </dialog>
+
+  <footer class="site-footer">
+    <p>Built with the UCSD Amazon review data (Ni, Li and McAuley, 2019). Prices and images appear only where the data has them.</p>
+  </footer>
+  <script src="/script.js"></script>
+</body>
+</html>

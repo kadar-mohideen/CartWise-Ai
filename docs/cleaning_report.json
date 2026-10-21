@@ -1,0 +1,34 @@
+{
+  "ratings": {
+    "rows_in": 883636,
+    "dropped_missing_values": 0,
+    "dropped_empty_ids": 0,
+    "dropped_invalid_rating": 0,
+    "dropped_duplicate_user_item": 8515,
+    "rows_out": 875121
+  },
+  "metadata": {
+    "rows_in": 186637,
+    "dropped_missing_asin": 0,
+    "titles_with_scraped_code": 433,
+    "dropped_duplicate_asin": 443,
+    "dropped_no_title": 33,
+    "rows_out": 186161,
+    "pct_with_price": 9.55,
+    "pct_with_image": 70.8,
+    "pct_with_brand": 75.02,
+    "pct_rich_text": 10.26
+  },
+  "join_and_filter": {
+    "interactions_in": 875121,
+    "dropped_no_metadata": 134,
+    "after_activity_filter": 136688,
+    "final_interactions": 136688,
+    "final_users": 58417,
+    "final_products": 19277,
+    "u_min": 2,
+    "i_min": 2,
+    "max_users": null,
+    "seed": 42
+  }
+}

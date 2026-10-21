@@ -1,0 +1,102 @@
+# ---- NOTE ----
+# # CartWise AI: data preparation in Google Colab
+# Run the cells in order with **Shift+Enter**. Everything is saved to your Google Drive folder `CartWiseAI`.
+# Before Cell 7, upload the project's `src` folder to `MyDrive/CartWiseAI/src` (drag and drop in Google Drive).
+
+# ===== COLAB CELL 1 (new cell > paste > Shift+Enter) =====
+# Cell 1: connect Google Drive and make folders
+from google.colab import drive
+import os
+drive.mount('/content/drive')
+PROJECT = '/content/drive/MyDrive/CartWiseAI'
+os.makedirs(f'{PROJECT}/raw', exist_ok=True)
+os.makedirs(f'{PROJECT}/processed', exist_ok=True)
+print('Project folder:', PROJECT)
+
+# ===== COLAB CELL 2 (new cell > paste > Shift+Enter) =====
+# Cell 2: download both files into Drive (-nc skips files that already exist)
+!wget -nc -P {PROJECT}/raw https://mcauleylab.ucsd.edu/public_datasets/data/amazon_v2/categoryFilesSmall/AMAZON_FASHION.csv
+!wget -nc -P {PROJECT}/raw https://mcauleylab.ucsd.edu/public_datasets/data/amazon_v2/metaFiles2/meta_AMAZON_FASHION.json.gz
+!ls -lh {PROJECT}/raw
+!head -3 {PROJECT}/raw/AMAZON_FASHION.csv
+
+# ===== COLAB CELL 3 (new cell > paste > Shift+Enter) =====
+# Cell 3: load the ratings and check the basics
+import pandas as pd
+ratings = pd.read_csv(f'{PROJECT}/raw/AMAZON_FASHION.csv', header=None,
+                      names=['asin', 'reviewerID', 'rating', 'timestamp'],
+                      dtype={'asin': str, 'reviewerID': str})
+print(ratings.head())
+print(ratings.dtypes)
+print('rows:', len(ratings))
+print('missing:'); print(ratings.isna().sum())
+print('rating counts:'); print(ratings.rating.value_counts().sort_index())
+print('duplicate (user, item) rows:', ratings.duplicated(['reviewerID', 'asin']).sum())
+print('date range:', pd.to_datetime(ratings.timestamp, unit='s').agg(['min', 'max']).tolist())
+
+# ===== COLAB CELL 4 (new cell > paste > Shift+Enter) =====
+# Cell 4: sparsity. This decides whether collaborative filtering is viable.
+uc = ratings.groupby('reviewerID').size()
+ic = ratings.groupby('asin').size()
+print('users:', len(uc), '| products:', len(ic))
+for k in (1, 2, 3, 5, 10):
+    print(f'users with >= {k} ratings: {(uc >= k).sum():,}')
+for k in (1, 3, 5):
+    print(f'products with >= {k} ratings: {(ic >= k).sum():,}')
+
+# ===== COLAB CELL 5 (new cell > paste > Shift+Enter) =====
+# Cell 5: load the metadata and see which fields are really filled
+import gzip, json
+rows = []
+with gzip.open(f'{PROJECT}/raw/meta_AMAZON_FASHION.json.gz', 'rt', encoding='utf-8') as f:
+    for line in f:
+        rows.append(json.loads(line))
+meta = pd.DataFrame(rows)
+del rows
+
+def filled(v):
+    if v is None or (isinstance(v, str) and v == ''):
+        return False
+    if isinstance(v, float) and v != v:
+        return False
+    if isinstance(v, (list, dict)) and len(v) == 0:
+        return False
+    return True
+
+print('shape:', meta.shape)
+print('columns:', meta.columns.tolist())
+print('duplicate asin:', meta.asin.duplicated().sum())
+print((meta.apply(lambda s: s.map(filled).mean()) * 100).round(1).sort_values(ascending=False))
+
+# ===== COLAB CELL 6 (new cell > paste > Shift+Enter) =====
+# Cell 6: look at real values, then check how well ratings join to metadata
+pd.set_option('display.max_colwidth', 80)
+print(meta.sample(3, random_state=0).T)
+meta_asins = set(meta.asin)
+rated = set(ratings.asin)
+print('rated products with metadata:', len(rated & meta_asins), 'of', len(rated))
+print('ratings whose product has metadata: %.1f%%' % (ratings.asin.isin(meta_asins).mean() * 100))
+
+# ---- NOTE ----
+# **STOP.** Copy the output of Cells 2 to 6 and send it to Claude before continuing. The activity filter in Cell 7 (`u_min`, `i_min`) should be chosen from the Cell 4 numbers.
+
+# ===== COLAB CELL 7 (new cell > paste > Shift+Enter) =====
+# Cell 7: run the cleaning pipeline (needs MyDrive/CartWiseAI/src uploaded)
+import sys, importlib, logging
+logging.basicConfig(level=logging.INFO, format='%(message)s')
+sys.path.insert(0, PROJECT)
+from src import preprocessing
+importlib.reload(preprocessing)
+
+report = preprocessing.run_pipeline(
+    ratings_path=f'{PROJECT}/raw/AMAZON_FASHION.csv',
+    meta_path=f'{PROJECT}/raw/meta_AMAZON_FASHION.json.gz',
+    out_dir=f'{PROJECT}/processed',
+    u_min=3, i_min=3,      # change after reading the sparsity numbers from Cell 4
+    max_users=None,        # e.g. 30000 if the result is too big for your laptop
+)
+print(json.dumps(report, indent=2))
+
+# ===== COLAB CELL 8 (new cell > paste > Shift+Enter) =====
+# Cell 8: confirm the three output files, then download them from Drive to data/processed on your laptop
+!ls -lh {PROJECT}/processed

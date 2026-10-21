@@ -1,0 +1,6 @@
+{
+  "hybrid_weight": 0.5,
+  "positive_rating": 4,
+  "k": 10,
+  "svd_components": 100
+}
